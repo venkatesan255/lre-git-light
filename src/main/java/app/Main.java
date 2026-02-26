@@ -1,44 +1,41 @@
 package app;
 
-import config.*;
+import model.LreConnection;
+import model.LreRunConfig;
+import model.LreRunContext;
+import config.LreConfigurationLoader;
 import config.source.CompositeConfigSource;
-import config.source.ConfigSource;
 import config.source.EnvConfigSource;
 import config.source.JsonConfigSource;
-import lombok.extern.slf4j.Slf4j;
-import model.LreTestRunModel;
-import service.LreClient;
-import service.LreRunService;
+import model.LreTest;
 
 import java.nio.file.Path;
 import java.util.Optional;
 
-@Slf4j
 public class Main {
 
     public static void main(String[] args) {
+        LreRunContext context = loadContext();
 
+        LreConnection connection = context.connection();
+        LreRunConfig runConfig = context.runConfig();
+        LreTest lreTest = context.test();
+
+        int exitCode = new ServiceFactory(connection)
+                .buildRunService()
+                .executeRun(runConfig, lreTest);
+
+        System.exit(exitCode);
+    }
+
+    private static LreRunContext loadContext() {
         Path configPath = Optional.ofNullable(System.getenv("CONFIG_FILE"))
                 .map(Path::of)
                 .orElse(Path.of("config.json"));
 
-        ConfigSource source = new CompositeConfigSource(
+        return new LreConfigurationLoader(new CompositeConfigSource(
                 new EnvConfigSource(),
                 new JsonConfigSource(configPath)
-        );
-
-        LreConfigurationLoader loader = new LreConfigurationLoader(source);
-        LreTestRunModel model = loader.load();
-
-        log.info(model.connection().toString());
-        log.info(model.test().toString());
-        log.info(model.runConfig().toString());
-
-        LreClient client = new LreClient(model.connection());
-        LreRunService runService = new LreRunService(client);
-
-        int exitCode = runService.executeRun(model);
-
-        System.exit(exitCode);
+        )).load();
     }
 }

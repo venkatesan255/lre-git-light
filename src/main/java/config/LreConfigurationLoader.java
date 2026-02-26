@@ -9,7 +9,7 @@ import java.util.List;
 
 public record LreConfigurationLoader(ConfigSource source) {
 
-    public LreTestRunModel load() {
+    public LreRunContext load() {
         List<String> missingKeys = new ArrayList<>();
 
         String serverUrl = getRequired("lre.serverUrl", missingKeys);
@@ -46,7 +46,7 @@ public record LreConfigurationLoader(ConfigSource source) {
                 .testInstanceId(getInt("test.instanceId", 0))
                 .build();
 
-        return new LreTestRunModel(connection, runConfig, test);
+        return new LreRunContext(connection, runConfig, test);
     }
 
     private String getRequired(String key, List<String> missingKeys) {

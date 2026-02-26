@@ -1,6 +1,6 @@
 package model;
 
-public record LreTestRunModel(
+public record LreRunContext(
         LreConnection connection,
         LreRunConfig runConfig,
         LreTest test
