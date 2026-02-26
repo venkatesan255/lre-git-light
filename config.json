@@ -1,0 +1,28 @@
+{
+  "lre": {
+    "serverUrl": "http://myserver",
+    "gitToken": "my-token",
+    "domain": "myDomain",
+    "project": "myProject"
+  },
+  "test": {
+    "id": 1,
+    "name": "My Load Test",
+    "folderPath": "Root/Tests",
+    "instanceId": 0
+  },
+  "timeslot": {
+    "duration": {
+      "hours": 0,
+      "minutes": 30
+    }
+  },
+  "run": {
+    "maxErrors": 5000,
+    "maxFailedTransactions": 3000,
+    "vudsMode": false,
+    "vudsAmount": 0,
+    "workspace": "",
+    "fromGitLab": true
+  }
+}
