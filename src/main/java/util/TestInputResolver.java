@@ -12,7 +12,6 @@ public class TestInputResolver {
      * Detects the type of test input provided by the user.
      */
     public static TestType detect(String testValue) {
-        if (testValue == null || testValue.isBlank()) return TestType.EXISTING;
         if (testValue.chars().allMatch(Character::isDigit)) return TestType.BY_ID;
         if (testValue.endsWith(".xlsx")) return TestType.EXCEL;
         return TestType.EXISTING;

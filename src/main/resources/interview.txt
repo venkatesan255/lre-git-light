@@ -1,0 +1,77 @@
+
+## LoadRunner Enterprise — Advanced
+
+**Architecture & Design**
+
+1. How have you designed an end-to-end performance testing framework from scratch? What were your key design decisions around script structure, reusability, and maintainability?
+2. How do you architect a LoadRunner Enterprise setup for a large enterprise program with multiple applications, teams, and parallel test executions?
+3. Have you worked with LoadRunner Enterprise's MI Listener and Unified Controller? How have you managed cross-geography distributed load generation at scale?
+4. How do you manage LoadRunner Enterprise in a shared services model — where multiple project teams are consuming the same infrastructure?
+
+**Scripting Depth**
+
+5. How do you handle complex authentication mechanisms like OAuth2.0, SAML, or certificate-based auth in LoadRunner scripts?
+6. Have you written custom C-based functions or used external libraries within VuGen? Give an example of a complex scripting challenge you solved.
+7. How do you handle WebSocket, gRPC, or async API protocols in LoadRunner? What are the limitations you've encountered?
+8. What is your approach to handling highly dynamic applications (SPAs, heavy JavaScript rendering) where traditional correlation breaks down?
+
+**Execution & Stability**
+
+9. How do you ensure test repeatability and environment stability across multiple test cycles? What pre-test checklists or gates do you enforce?
+10. How do you handle flaky or inconsistent test results? Walk me through your debugging methodology.
+11. At what point do you decide a performance test environment is "production-like enough" to trust the results?
+
+**Analysis & Root Cause**
+
+12. Walk me through the most complex performance bottleneck you've ever diagnosed. What tools and data points led you to the root cause?
+13. How do you differentiate between an application-level bottleneck, a database bottleneck, a network issue, and an infrastructure constraint purely from LoadRunner and server-side data?
+14. How do you build a performance baseline and use it to detect regression across releases?
+
+---
+
+## AWS — Advanced
+
+**Infrastructure at Scale**
+
+15. How have you architected a cloud-based load generation setup on AWS to simulate 50,000+ concurrent virtual users? What were the challenges?
+16. How do you handle AWS service limits and throttling during high-volume tests? What proactive steps do you take?
+17. Have you used AWS infrastructure-as-code (CloudFormation or Terraform) to provision and tear down performance test environments? How does this fit into your testing lifecycle?
+
+**Monitoring & Observability**
+
+18. How do you build a comprehensive observability stack for performance testing on AWS? How do you stitch together CloudWatch, X-Ray, and application APM tools like Dynatrace or AppDynamics?
+19. Have you set up custom CloudWatch dashboards or metrics for performance testing purposes? What metrics do you typically track beyond the defaults?
+20. How do you correlate AWS-side metrics (CPU, memory, ELB latency, RDS IOPS) with LoadRunner client-side metrics to build a complete picture?
+
+**Cost & Optimization**
+
+21. How do you balance cost vs. accuracy when running performance tests on AWS? Have you used Spot Instances for load generators? What's your fallback strategy if a Spot Instance is reclaimed mid-test?
+22. How do you design tests to minimize AWS data transfer costs, especially in cross-region scenarios?
+
+**Cloud-Native Considerations**
+
+23. How do you performance test auto-scaling applications on AWS? How do you validate that the scaling policy itself performs correctly under load?
+24. How do you test applications that use AWS-managed services like SQS, SNS, Lambda, or DynamoDB? What are the unique challenges compared to traditional app testing?
+25. Have you done performance testing on containerized workloads running on ECS or EKS? How does that differ from testing on EC2?
+
+---
+
+## Strategy, Leadership & Process
+
+26. How do you build a performance testing strategy for a large program — covering NFR definition, test scope, environment strategy, entry/exit criteria, and stakeholder reporting?
+27. How do you influence development and architecture teams to act on performance findings, especially when there's pushback on timelines or priorities?
+28. How have you integrated performance testing into a CI/CD pipeline? What thresholds and gates did you define, and how did you handle failures?
+29. How do you mentor or upskill junior performance engineers? What does good performance engineering practice look like to you?
+30. Have you contributed to NFR (Non-Functional Requirements) definition workshops? How do you challenge or validate requirements that seem unrealistic?
+
+---
+
+## Red Flag Indicators to Watch For
+
+- Can only describe tool steps but struggles to explain **why** decisions were made
+- Has never done **root cause analysis** beyond surface-level metrics
+- No experience **influencing teams** or driving fixes — purely execution focused
+- Cannot speak to **test environment strategy** or has always relied on others to set it up
+- No awareness of **cloud cost management** in testing contexts
+
+---
