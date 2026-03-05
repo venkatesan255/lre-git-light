@@ -24,5 +24,8 @@
     "vudsAmount": 0,
     "workspace": "",
     "fromGitLab": true
+  },
+  "sync": {
+    "fromGitLab": true
   }
 }

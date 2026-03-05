@@ -1,76 +1,93 @@
 package config;
 
+import client.model.LreRunContext;
+import client.model.connection.LreConnection;
+import client.model.connection.SecretValue;
+import client.model.resultextraction.ResultNotification;
+import client.model.run.RunConfig;
+import client.model.sync.SyncConfig;
+import client.model.test.LreTest;
 import config.source.ConfigSource;
-import model.*;
+import config.source.ConfigSourceReader;
+import model.enums.PostRunAction;
+import model.timeslot.Timeslot;
 
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 
-public record LreConfigurationLoader(ConfigSource source) {
+public final class LreConfigurationLoader {
+
+    private final ConfigSourceReader reader;
+
+    public LreConfigurationLoader(ConfigSource source) {
+        this.reader = new ConfigSourceReader(source);
+    }
 
     public LreRunContext load() {
         List<String> missingKeys = new ArrayList<>();
+        LreConnection connection = buildConnection(missingKeys);
 
-        String serverUrl = getRequired("lre.serverUrl", missingKeys);
-        String gitToken = getRequired("lre.gitToken", missingKeys);
-        String domain = getRequired("lre.domain", missingKeys);
-        String project = getRequired("lre.project", missingKeys);
+        if (!missingKeys.isEmpty()) {
+            throw new ConfigurationValidationException(missingKeys);
+        }
 
-        if (!missingKeys.isEmpty()) throw new ConfigurationValidationException(missingKeys);
+        return new LreRunContext(
+                connection,
+                buildRunConfig(),
+                buildTest(),
+                buildNotification(),
+                buildSyncConfig()
+        );
+    }
 
-        LreConnection connection = LreConnection.builder()
-                .serverUrl(serverUrl)
-                .gitToken(new SecretValue(gitToken))
-                .domain(domain)
-                .project(project)
+    private LreConnection buildConnection(List<String> missingKeys) {
+        return LreConnection.builder()
+                .serverUrl(reader.getRequired("lre.serverUrl", missingKeys))
+                .gitToken(new SecretValue(reader.getRequired("lre.gitToken", missingKeys)))
+                .domain(reader.getRequired("lre.domain", missingKeys))
+                .project(reader.getRequired("lre.project", missingKeys))
+                .build();
+    }
+
+    private RunConfig buildRunConfig() {
+        Timeslot timeslot = Timeslot.builder()
+                .hours(reader.getInt("timeslot.duration.hours", 0))
+                .minutes(reader.getInt("timeslot.duration.minutes", 30))
                 .build();
 
         String defaultWorkspace = Path.of(System.getProperty("user.dir"), "artifacts").toString();
 
-        LreRunConfig runConfig = LreRunConfig.builder()
-                .timeslotHours(getInt("timeslot.duration.hours", 0))
-                .timeslotMinutes(getInt("timeslot.duration.minutes", 30))
-                .maxErrors(getLong("run.maxErrors", 5000))
-                .maxFailedTransactions(getLong("run.maxFailedTransactions", 3000))
-                .vudsMode(getBoolean("run.vudsMode", false))
-                .vudsAmount(getInt("run.vudsAmount", 0))
-                .workspace(getOptionalString("run.workspace", defaultWorkspace))
-                .runTestFromGitLab(getBoolean("run.fromGitLab", true))
+        return RunConfig.builder()
+                .timeslot(timeslot)
+                .maxErrors(reader.getLong("run.maxErrors", 5000))
+                .maxFailedTransactions(reader.getLong("run.maxFailedTransactions", 3000))
+                .workspace(reader.getOptionalString("run.workspace", defaultWorkspace))
+                .runTestFromGitLab(reader.getBoolean("run.fromGitLab", true))
+                .postRunAction(PostRunAction.fromString(reader.getOptionalString("run.postRunAction", "Collate and Analyze")))
                 .build();
+    }
 
-        LreTest test = LreTest.builder()
-                .testId(getInt("test.id", 0))
-                .testName(getOptionalString("test.name", ""))
-                .folderPath(getOptionalString("test.folderPath", ""))
-                .testInstanceId(getInt("test.instanceId", 0))
+    private LreTest buildTest() {
+        return LreTest.builder()
+                .testId(reader.getInt("test.id", 0))
+                .testName(reader.getOptionalString("test.name", ""))
+                .folderPath(reader.getOptionalString("test.folderPath", ""))
+                .instanceId(reader.getInt("test.instanceId", 0))
                 .build();
-
-        return new LreRunContext(connection, runConfig, test);
     }
 
-    private String getRequired(String key, List<String> missingKeys) {
-        return source.get(key)
-                .filter(v -> !v.isBlank())
-                .orElseGet(() -> {
-                    missingKeys.add(key);
-                    return null;
-                });
+    private ResultNotification buildNotification() {
+        return ResultNotification.builder()
+                .runId(reader.getInt("notification.runId", 0))
+                .ccRecipients(reader.getStringList("notification.cc"))
+                .bccRecipients(reader.getStringList("notification.bcc"))
+                .build();
     }
 
-    private String getOptionalString(String key, String defaultValue) {
-        return source.get(key).orElse(defaultValue);
-    }
-
-    private int getInt(String key, int defaultValue) {
-        return source.get(key).map(Integer::parseInt).orElse(defaultValue);
-    }
-
-    private long getLong(String key, long defaultValue) {
-        return source.get(key).map(Long::parseLong).orElse(defaultValue);
-    }
-
-    private boolean getBoolean(String key, boolean defaultValue) {
-        return source.get(key).map(Boolean::parseBoolean).orElse(defaultValue);
+    private SyncConfig buildSyncConfig() {
+        return SyncConfig.builder()
+                .syncEnabled(reader.getBoolean("sync.fromGitLab", true))
+                .build();
     }
 }

@@ -13,7 +13,7 @@ public class EnvConfigSource implements ConfigSource {
                 .toUpperCase()
                 .replace(".", "_");
 
-        log.info("key: {}, envKey: {}", key, envKey);
+        log.debug("key: {}, envKey: {}", key, envKey);
         return Optional.ofNullable(System.getenv(envKey));
     }
 }
