@@ -7,9 +7,14 @@ import lombok.extern.slf4j.Slf4j;
 import client.model.test.LreTest;
 import model.test.Test;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.usermodel.WorkbookFactory;
 import util.TestInputResolver;
 import util.path.PathUtils;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -28,7 +33,7 @@ public class TestManager {
 
         return switch (TestInputResolver.detect(testName)) {
             case EXISTING -> resolveByPath(input);
-            case EXCEL -> throw new UnsupportedOperationException("Excel import not yet implemented");
+            case EXCEL -> resolveByExcel(input);
             case BY_ID -> resolveById(Integer.parseInt(testName));
         };
     }
@@ -106,5 +111,36 @@ public class TestManager {
             throw new LreTestResolutionException("Test name is empty after normalization");
         }
         return normalized;
+    }
+
+    private LreTest resolveByExcel(LreTest input) {
+        Path excelPath = Path.of(input.testName());
+
+        if (!Files.exists(excelPath)) {
+            throw new LreTestResolutionException("Excel file not found: " + excelPath.toAbsolutePath());
+        }
+
+        String sheetName = StringUtils.isBlank(input.sheetName())
+                ? resolveFirstSheetName(excelPath)
+                : input.sheetName();
+
+        log.info("Importing test from Excel: '{}', sheet: '{}'", excelPath.getFileName(), sheetName);
+        Test importedTest = client.importTestFromExcel(excelPath, sheetName);
+        log.info("Excel import successful - test: '{}' (ID: {})", importedTest.getName(), importedTest.getId());
+
+        return mapToLreTest(importedTest);
+    }
+
+    private String resolveFirstSheetName(Path excelPath) {
+        try (Workbook workbook = WorkbookFactory.create(excelPath.toFile())) {
+            if (workbook.getNumberOfSheets() == 0) {
+                throw new LreTestResolutionException("Excel file has no sheets: " + excelPath.getFileName());
+            }
+            String sheetName = workbook.getSheetAt(0).getSheetName();
+            log.info("No sheet name configured, using first sheet: '{}'", sheetName);
+            return sheetName;
+        } catch (IOException e) {
+            throw new LreTestResolutionException("Failed to read Excel file: " + excelPath.getFileName(), e);
+        }
     }
 }
